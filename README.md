@@ -1,6 +1,11 @@
 # swaggyp
 Python library for generating Swagger API templates
 
+## Install
+
+```python
+pip install swaggyp
+```
 ## Example
 ```python
 import swaggyp as sw
