@@ -6,9 +6,9 @@ install_reqs = parse_requirements('requirements.txt', session=False)
 version = '0.1.0'
 
 setup(
-    name='sammy',
+    name='swaggyp',
     version=version,
-    description="Python library for generating Swagger templates ",
+    description="Python library for generating Swagger templates based on valley ",
     classifiers=[
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
@@ -16,7 +16,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3 :: Only"
     ],
-    keywords='serverless, cloudformation, sam',
+    keywords='swagger, valley, api',
     author='Brian Jinwright',
     author_email='opensource@ipoots.com',
     maintainer='Brian Jinwright',
