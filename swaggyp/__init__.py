@@ -30,9 +30,92 @@ def remove_nulls(obj_dict):
         obj_dict.pop(k)
     return obj_dict
 
+
+class Contact(Swag):
+    name = CharProperty()
+    url = CharProperty()
+    email = EmailProperty()
+
+
+class License(Swag):
+    name = CharProperty()
+    url = CharProperty()
+
+class XML(Swag):
+    name = CharProperty()
+    namespace = CharProperty()
+    prefix = CharProperty()
+    attribute = BooleanProperty()
+    wrapped = BooleanProperty()
+
+
+class ExternalDocs(Swag):
+    description = CharProperty()
+    url = CharProperty(required=True)
+
+
+class SwagSchema(Swag):
+    ref = CharProperty()
+    _format = CharProperty()
+    title = CharProperty()
+    description = CharProperty()
+    default = DictProperty()
+    multipleOf = FloatProperty()
+    maximum = IntegerProperty()
+    exclusiveMaximum = IntegerProperty()
+    minimum = IntegerProperty()
+    exclusiveMinimum = IntegerProperty()
+    maxLength = IntegerProperty()
+    minLength = IntegerProperty()
+    pattern = CharProperty()
+    maxItems = IntegerProperty()
+    minItems = IntegerProperty()
+    uniqueItems = BooleanProperty()
+    maxProperties = IntegerProperty()
+    minProperties = IntegerProperty()
+    required = ListProperty()
+    enum = ListProperty()
+    items = DictProperty()
+    properties = DictProperty()
+    additionalProperties = DictProperty()
+    allOf = ListProperty()
+    discriminator = CharProperty()
+    readOnly = BooleanProperty()
+    xml = ForeignProperty(XML)
+    externalDocs = ForeignProperty(ExternalDocs)
+    example = BaseProperty()
+    _type = ListProperty()
+
+    def to_dict(self):
+        obj_dict = remove_nulls(self._data.copy())
+        _format = obj_dict.pop('_format')
+        _type = obj_dict.pop('_type')
+        if _format:
+            obj_dict['format'] = _format
+        if _type:
+            obj_dict['type'] = _type
+        return obj_dict
+
+class Parameter(Swag):
+    name = CharProperty()
+    _in = CharProperty(required=True,choices=['query','header','path','formData','body'])
+    description = CharProperty()
+    required = BooleanProperty()
+    schema = ForeignProperty(SwagSchema)
+
+    def to_dict(self):
+        obj_dict = remove_nulls(self._data.copy())
+        _in = obj_dict.pop('_in')
+        obj_dict['in'] = _in
+        return obj_dict
+
+
 class Info(Swag):
     title = CharProperty(required=True)
     description = CharProperty()
+    termsOfService = CharProperty()
+    contact = ForeignProperty(Contact)
+    license = ForeignProperty(License)
     version = CharProperty(required=True)
 
 
@@ -49,6 +132,12 @@ class Operation(Swag):
     http_method = CharProperty(required=True)
     summary = CharProperty()
     description = CharProperty()
+    externalDocs = DictProperty()
+    operationId = CharProperty()
+    consumes = ListProperty()
+    produces = ListProperty()
+    parameters = ForeignListProperty(Parameter)
+
     responses = ForeignListProperty(Response)
 
     def to_dict(self):
@@ -78,20 +167,41 @@ class Path(Swag):
         return {endpoint:op_dict}
 
 
+class Definition(Swag):
+    name = CharProperty(required=True)
+    schema = ForeignProperty(SwagSchema,required=True)
+
+    def to_dict(self):
+        obj_dict = remove_nulls(self._data.copy())
+        name = obj_dict.pop('name')
+        schema = obj_dict.pop('schema')
+        return {name:schema}
+
+
 class SwaggerTemplate(Swag):
     swagger = CharProperty(default_value="2.0")
+    info = ForeignProperty(Info, required=True)
     host = CharProperty()
     basePath = CharProperty(required=True)
-    info = ForeignProperty(Info,required=True)
-    paths = ForeignListProperty(Path)
     schemes = ListProperty(required=True)
     consumes = ListProperty()
     produces = ListProperty()
+    paths = ForeignListProperty(Path)
+    definitions = ForeignListProperty(Definition)
+    parameters = DictProperty()
+    responses = DictProperty()
+    securityDefinitions = DictProperty()
+    security = DictProperty()
+    tags = DictProperty()
+    externalDocs = DictProperty()
 
     def to_dict(self):
         obj_dict = remove_nulls(self._data.copy())
         paths = obj_dict.pop('paths')
-
+        definitions = obj_dict.pop('definitions')
+        if definitions:
+            obj_dict['definitions'] = {i._data.get('name'):i._data.get(
+                'schema') for i in definitions}
         path_dict = dict()
         for obj in paths:
             path_dict.update(obj.to_dict())
