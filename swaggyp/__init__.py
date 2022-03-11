@@ -174,7 +174,7 @@ class Parameter(Item):
         _in = obj_dict.pop('_in')
 
         obj_dict['in'] = _in
-        if _in != 'body' and self.cleaned_data.get('type') == None:
+        if _in != 'body' and self.cleaned_data.get('_type') == None:
             raise ValidationException('_type is required if _in is not equal to "body"')
         if _in == 'path':
             obj_dict.pop('allowEmptyValue')
