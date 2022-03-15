@@ -1,2 +1,2 @@
 pyyaml>=3.12
-valley>=1.5.1
+valley>=1.5.2
