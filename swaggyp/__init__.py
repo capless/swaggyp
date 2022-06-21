@@ -172,12 +172,19 @@ class Parameter(Item):
     def to_dict(self):
         obj_dict = super(Parameter, self).to_dict()
         _in = obj_dict.pop('_in')
+        schema = obj_dict.get('schema')
 
         obj_dict['in'] = _in
         if _in != 'body' and self.cleaned_data.get('_type') == None:
             raise ValidationException('_type is required if _in is not equal to "body"')
         if _in == 'path':
             obj_dict.pop('allowEmptyValue')
+        if _in == 'body' and schema:
+            obj_dict.pop('allowEmptyValue')
+            obj_dict.pop('collectionFormat')
+            obj_dict.pop('exclusiveMaximum')
+            obj_dict.pop('exclusiveMinimum')
+            obj_dict.pop('uniqueItems')
         return obj_dict
 
 
