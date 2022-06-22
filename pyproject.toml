@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "swaggyp"
+version = "0.2.0"
+description = "Python library for generating Swagger templates based on valley"
+authors = ["Brian Jinwright <bjinwright@qwigo.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+PyYAML = "^6.0"
+valley = "^1.5.6"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

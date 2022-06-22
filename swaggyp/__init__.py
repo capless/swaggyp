@@ -18,45 +18,46 @@ def remove_nulls(obj_dict):
 
 
 TYPE_CHOICES = {
-    'string':'string',
-    'number':'number',
-    'integer':'integer',
-    'boolean':'boolean',
-    'array':'array',
-    'file':'file'
+    'string': 'string',
+    'number': 'number',
+    'integer': 'integer',
+    'boolean': 'boolean',
+    'array': 'array',
+    'file': 'file'
 }
 
 IN_CHOICES = {
-    'query':'query',
-    'header':'header',
-    'path':'path',
-    'formData':'formData',
-    'body':'body'
+    'query': 'query',
+    'header': 'header',
+    'path': 'path',
+    'formData': 'formData',
+    'body': 'body'
 }
 
 COLLECTION_FORMATS = {
-    'csv':'csv',
-    'ssv':'ssv',
-    'tsv':'tsv',
-    'pipes':'pipes',
-    'multi':'multi'
+    'csv': 'csv',
+    'ssv': 'ssv',
+    'tsv': 'tsv',
+    'pipes': 'pipes',
+    'multi': 'multi'
 }
+
 
 class Swag(Schema):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super(Swag, self).__init__(**kwargs)
         self.validate()
 
     def to_yaml(self):
-        jd = json.dumps(self.to_dict(),cls=ValleyEncoderNoType)
-        #TODO: Write this without converting to JSON first
+        jd = json.dumps(self.to_dict(), cls=ValleyEncoderNoType)
+        # TODO: Write this without converting to JSON first
         jl = json.loads(jd)
         return yaml.safe_dump(jl,
                               default_flow_style=False)
 
     def to_json(self):
-        return json.dumps(self.to_dict(),cls=ValleyEncoderNoType)
+        return json.dumps(self.to_dict(), cls=ValleyEncoderNoType)
 
     def to_dict(self):
         return remove_nulls(self.cleaned_data.copy())
@@ -71,6 +72,7 @@ class Contact(Swag):
 class License(Swag):
     name = CharProperty()
     url = CharProperty()
+
 
 class XML(Swag):
     name = CharProperty()
@@ -119,9 +121,9 @@ class SwagSchema(Swag):
 
     def to_dict(self):
         obj_dict = super(SwagSchema, self).to_dict()
-        _format = obj_dict.pop('_format',None)
-        _type = obj_dict.pop('_type',None)
-        ref = obj_dict.pop('ref',None)
+        _format = obj_dict.pop('_format', None)
+        _type = obj_dict.pop('_type', None)
+        ref = obj_dict.pop('ref', None)
         if ref:
             obj_dict['$ref'] = ref
         if _format:
@@ -134,7 +136,7 @@ class SwagSchema(Swag):
 class Item(Swag):
     _type = CharProperty(choices=TYPE_CHOICES)
     _format = CharProperty()
-    collectionFormat = CharProperty(choices=COLLECTION_FORMATS,default_value='csv')
+    collectionFormat = CharProperty(choices=COLLECTION_FORMATS, default_value='csv')
     default = BaseProperty()
     maximum = IntegerProperty()
     exclusiveMaximum = BooleanProperty()
@@ -151,8 +153,8 @@ class Item(Swag):
 
     def to_dict(self):
         obj_dict = super(Item, self).to_dict()
-        _format = obj_dict.pop('_format',None)
-        _type = obj_dict.pop('_type',None)
+        _format = obj_dict.pop('_format', None)
+        _type = obj_dict.pop('_type', None)
         if _type:
             obj_dict['type'] = _type
         if _format:
@@ -162,7 +164,7 @@ class Item(Swag):
 
 class Parameter(Item):
     name = CharProperty()
-    _in = CharProperty(required=True,choices=IN_CHOICES)
+    _in = CharProperty(required=True, choices=IN_CHOICES)
     description = CharProperty()
     required = BooleanProperty()
     items = ForeignProperty(Item)
@@ -198,7 +200,7 @@ class Response(Swag):
     def to_dict(self):
         obj_dict = remove_nulls(self.cleaned_data.copy())
         status_code = obj_dict.pop('status_code')
-        return {status_code:obj_dict}
+        return {status_code: obj_dict}
 
 
 class Operation(Swag):
@@ -222,7 +224,7 @@ class Operation(Swag):
             resp_dict.update(resp.to_dict())
 
         obj_dict['responses'] = resp_dict
-        return {http_method:obj_dict}
+        return {http_method: obj_dict}
 
 
 class Path(Swag):
@@ -237,18 +239,18 @@ class Path(Swag):
         op_dict = dict()
         for op in operations:
             op_dict.update(op.to_dict())
-        return {endpoint:op_dict}
+        return {endpoint: op_dict}
 
 
 class Definition(Swag):
     name = CharProperty(required=True)
-    schema = ForeignProperty(SwagSchema,required=True)
+    schema = ForeignProperty(SwagSchema, required=True)
 
     def to_dict(self):
         obj_dict = super(Definition, self).to_dict()
         name = obj_dict.pop('name')
         schema = obj_dict.pop('schema')
-        return {name:schema}
+        return {name: schema}
 
 
 class SwaggerTemplate(Swag):
@@ -270,10 +272,10 @@ class SwaggerTemplate(Swag):
 
     def to_dict(self):
         obj_dict = super(SwaggerTemplate, self).to_dict().copy()
-        paths = obj_dict.pop('paths',[])
-        definitions = obj_dict.pop('definitions',None)
+        paths = obj_dict.pop('paths', [])
+        definitions = obj_dict.pop('definitions', None)
         if definitions:
-            obj_dict['definitions'] = {i.cleaned_data.get('name'):i.cleaned_data.get(
+            obj_dict['definitions'] = {i.cleaned_data.get('name'): i.cleaned_data.get(
                 'schema') for i in definitions}
         path_dict = dict()
         if paths:
@@ -282,7 +284,7 @@ class SwaggerTemplate(Swag):
             obj_dict['paths'] = path_dict
         return obj_dict
 
-    def add_path(self,path):
+    def add_path(self, path):
         self._base_properties.get('paths').validate([path], 'paths')
         paths = self.cleaned_data.get('paths') or []
         paths.append(path)
